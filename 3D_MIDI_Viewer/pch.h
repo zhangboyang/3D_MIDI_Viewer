@@ -8,10 +8,12 @@
 #include <cstdlib>
 #include <vector>
 #include <algorithm>
+#include <functional>
+#include <string>
 
 #define FREEGLUT_STATIC
 #include <GL/glew.h>
-#include <GL/glut.h>
+#include <GL/freeglut.h>
 #include <glm/glm.hpp>
 
 #ifdef NDEBUG
@@ -20,4 +22,6 @@
 #pragma comment(lib, "glew32sd.lib")
 #endif
 
+
+#include "GLGraphics.h"
 
