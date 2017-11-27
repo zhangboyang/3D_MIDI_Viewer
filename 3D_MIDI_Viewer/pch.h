@@ -10,11 +10,16 @@
 #include <algorithm>
 #include <functional>
 #include <string>
+#include <memory>
 
-#define FREEGLUT_STATIC
+#include <windows.h>
+
+#define GLEW_STATIC
 #include <GL/glew.h>
+#define FREEGLUT_STATIC
 #include <GL/freeglut.h>
 #include <glm/glm.hpp>
+#include <glm/ext.hpp>
 
 #ifdef NDEBUG
 #pragma comment(lib, "glew32s.lib")
@@ -22,6 +27,7 @@
 #pragma comment(lib, "glew32sd.lib")
 #endif
 
-
+#include "misc.h"
+#include "MIDIData.h"
+#include "MIDIObject.h"
 #include "GLGraphics.h"
-

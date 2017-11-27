@@ -140,6 +140,9 @@
   <ItemGroup>
     <ClCompile Include="GLGraphics.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MIDIData.cpp" />
+    <ClCompile Include="MIDIObject.cpp" />
+    <ClCompile Include="misc.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -149,6 +152,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GLGraphics.h" />
+    <ClInclude Include="MIDIData.h" />
+    <ClInclude Include="MIDIObject.h" />
+    <ClInclude Include="misc.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
