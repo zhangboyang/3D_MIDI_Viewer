@@ -46,6 +46,7 @@ void GLGraphics::InitGlut(int *argcp, char **argv)
 	glutDisplayFunc([](){ GLGraphics::Instance()->Render(); });
 	glutIdleFunc([](){ GLGraphics::Instance()->Render(); });
 	glutReshapeFunc([](int w, int h){ GLGraphics::Instance()->Reshape(w, h); });
+	glutKeyboardFunc([](unsigned char k, int x, int y){ GLGraphics::Instance()->KeyboardFunc(k, x, y); });
 }
 
 void GLGraphics::Run()
@@ -56,15 +57,20 @@ void GLGraphics::Run()
 
 float GLGraphics::GetTimer()
 {
-	return (timeGetTime() - raw_timer) / 1000.0f;
+	return raw_timer / 1000.0f;
 }
 
 void GLGraphics::ResetTimer(float value)
 {
-	raw_timer = timeGetTime();
-	raw_timer += value * 1000.0f;
+	raw_timer = value * 1000.0f;
 }
 
+void GLGraphics::UpdateTimer()
+{
+	DWORD now_timer = timeGetTime();
+	if (!pause) raw_timer += now_timer - last_timer;
+	last_timer = now_timer;
+}
 
 void GLGraphics::LoadMIDIObject(std::shared_ptr<MIDIObject> mobj)
 {
@@ -73,6 +79,8 @@ void GLGraphics::LoadMIDIObject(std::shared_ptr<MIDIObject> mobj)
 
 void GLGraphics::Render()
 {
+	UpdateTimer();
+
 	if (GetTimer() > 10.0f) ResetTimer();
 
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -81,8 +89,9 @@ void GLGraphics::Render()
 	// set projection matrix
 	glMatrixMode(GL_PROJECTION);
 	glm::mat4 proj;
-	proj = glm::perspective(glm::radians(45.0f), (float) window_width / window_height, 0.1f, 100.0f);
-	proj *=	glm::lookAt(glm::vec3(5.0f, 20.0f, 20.0f), glm::vec3(5.0f, 10.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	//proj = glm::lookAt(glm::vec3(5.0f, 20.0f, 20.0f), glm::vec3(5.0f, 10.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	proj = glm::lookAt(glm::vec3(20.0f, 20.0f, 10.0f), glm::vec3(0.0f, 0.0f, -10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	proj = glm::perspective(glm::radians(45.0f), (float) window_width / window_height, 0.1f, 100.0f) * proj;
 	glLoadMatrixf(&proj[0][0]);
 
 	// set model martix
@@ -147,4 +156,11 @@ void GLGraphics::Reshape(int width, int height)
     window_height = height;
 	glViewport(0, 0, width, height);
     glutPostRedisplay();
+}
+
+void GLGraphics::KeyboardFunc(unsigned char key, int x, int y)
+{
+	printf("keyboard func: %c, %d, %d\n", key, x, y);
+
+	if (key == ' ') pause = !pause;
 }

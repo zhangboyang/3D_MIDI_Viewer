@@ -11,7 +11,10 @@ private:
 
 	std::shared_ptr<MIDIObject> mobj;
 
+	int pause = 0;
+
 	DWORD raw_timer;
+	DWORD last_timer;
 	
 public:
 	static GLGraphics *Instance();
@@ -25,9 +28,11 @@ private:
 
 	void Render();
 	void Reshape(int width, int height);
+	void KeyboardFunc(unsigned char key, int x, int y);
 
 	float GetTimer();
 	void ResetTimer(float value = 0.0f);
+	void UpdateTimer();
 
 	void DrawAxis();
 };
