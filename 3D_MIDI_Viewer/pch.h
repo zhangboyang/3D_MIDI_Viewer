@@ -1,5 +1,7 @@
 #pragma once
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #ifndef _DEBUG
 #define NDEBUG
 #endif
@@ -11,6 +13,8 @@
 #include <functional>
 #include <string>
 #include <memory>
+#include <set>
+#include <map>
 
 #include <windows.h>
 
@@ -28,6 +32,10 @@
 #endif
 
 #include "misc.h"
+#include "MIDIPlayer.h"
 #include "MIDIData.h"
 #include "MIDIObject.h"
 #include "GLGraphics.h"
+
+#define be32toh _byteswap_ulong
+#define be16toh _byteswap_ushort

@@ -5,6 +5,7 @@ class MIDIObject {
 	struct note_vertex {
 		glm::vec3 pos;
 		glm::vec3 color;
+		glm::vec3 color2;
 	};
 private:
 	std::shared_ptr<MIDIData> mdata;
@@ -14,6 +15,6 @@ private:
 	GLuint ibuf;
 public:
 	void LoadData(std::shared_ptr<MIDIData> mdata);
-	void Render();
+	void Render(bool color2 = false);
 private:
 };

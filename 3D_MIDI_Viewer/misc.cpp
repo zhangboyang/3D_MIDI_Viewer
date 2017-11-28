@@ -7,6 +7,7 @@ void fail(const char *fmt, ...)
     fprintf(stdout, "fail: ");
     vfprintf(stdout, fmt, ap);
     putchar('\n');
+	system("pause");
     exit(1);
     va_end(ap);
 }
