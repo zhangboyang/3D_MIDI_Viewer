@@ -3,6 +3,7 @@
 
 void MIDIPlayer::LoadMIDIFile(const std::string filename)
 {
+	printf("Loading MIDI File ...\n");
 	DWORD r;
 	MCI_OPEN_PARMS mciOpenParms;
 	mciOpenParms.lpstrDeviceType = (LPCSTR) MCI_DEVTYPE_SEQUENCER;

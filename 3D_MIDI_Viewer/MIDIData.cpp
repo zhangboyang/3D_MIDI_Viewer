@@ -211,7 +211,7 @@ void MIDIData::LoadMTrk(std::unique_ptr<MIDIBuffer> mtrk)
 					mtrk->Read(&value, 1, 1);
 					cur_tempo = (cur_tempo << 8) | value;
 				}
-				printf(" Set Tempo: %u\n", cur_tempo);
+				printf(" (%-6.2fs) Set Tempo: %u\n", cur_time, cur_tempo);
 				//system("pause");
 				bar.push_back(cur_time);
 
@@ -226,7 +226,7 @@ void MIDIData::LoadMTrk(std::unique_ptr<MIDIBuffer> mtrk)
 				mtrk->Read(&ts, sizeof(ts), 1);
 				nn = ts[0];
 				dd = 1 << ts[1];
-				printf(" Time Signature: %u/%u\n", nn, dd);
+				printf(" (%-6.2fs) Time Signature: %u/%u\n", cur_time, nn, dd);
 				break;
 			}
 			default:

@@ -60,9 +60,11 @@ void MIDIObject::LoadData(std::shared_ptr<MIDIData> mdata)
 		glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data[ch][0]) * vertex_data[ch].size(), vertex_data[ch].data(), GL_STATIC_DRAW);
 		vsize += sizeof(vertex_data[ch][0]) * vertex_data[ch].size() / 1024.0;
 	}
-	printf(" Vertex: %.3f KB\n", vsize);
+	printf(" Note Vertex: %.3f KB\n", vsize);
 
 	MakeBox();
+
+	printf(" Box Vertex: %.3f KB\n", sizeof(bvertex_data[0]) * bvertex_data.size() / 1024.0);
 }
 
 

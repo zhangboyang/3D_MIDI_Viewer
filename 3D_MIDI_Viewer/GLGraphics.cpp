@@ -43,7 +43,7 @@ void GLGraphics::InitGlut(int *argcp, char **argv)
         fail("glewInit() failed : %s", glewGetErrorString(glewerr));
     }
     if (!(GLEW_VERSION_1_5)) {
-        fail("opengl version is too low to run this program. (opengl 1.5 required)");
+        printf("WARNING: OpenGL version is too low to run this program. (OpenGL 1.5 required)");
     }
 
 
@@ -204,9 +204,8 @@ void GLGraphics::Render()
 	glMatrixMode(GL_MODELVIEW);
 	model = glm::scale(glm::vec3(1.0f, 1.0f, -1.0f));
 	glLoadMatrixf(&model[0][0]);
-
-	glPolygonMode(GL_FRONT, GL_FILL);
-	glPolygonMode(GL_BACK, GL_FILL);
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	DrawTransparentRect();
 
 	// render message

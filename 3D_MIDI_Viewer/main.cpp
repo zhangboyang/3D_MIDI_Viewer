@@ -3,6 +3,9 @@
 
 int main(int argc, char *argv[])
 {
+	printf("3D MIDI Viewer by ZBY\n");
+	printf("\n");
+
 	char midfile[MAX_PATH] = {};
 	if (argc >= 2) {
 		strncpy(midfile, argv[1], sizeof(midfile) - 1);
@@ -24,7 +27,7 @@ int main(int argc, char *argv[])
 		ofn.nFilterIndex = 1;
 		ofn.lpstrFileTitle = NULL;
 		ofn.nMaxFileTitle = 0;
-		ofn.lpstrInitialDir = NULL;
+		ofn.lpstrInitialDir = ".";
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
 		if (!GetOpenFileName(&ofn)) {
@@ -35,7 +38,7 @@ int main(int argc, char *argv[])
 		fail("No MIDI file.");
 	}
 
-	printf("MIDI File:\n  %s\n", midfile);
+	printf("MIDI File:\n  %s\n\n", midfile);
 	std::unique_ptr<MIDIPlayer> mplay(new MIDIPlayer);
 	mplay->LoadMIDIFile(midfile);
 
