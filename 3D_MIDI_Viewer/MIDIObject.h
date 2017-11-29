@@ -2,19 +2,25 @@
 
 class MIDIObject {
 	static constexpr float NOTE_WIDTH = 0.5f;
-	struct note_vertex {
-		glm::vec3 pos;
-		glm::vec3 color;
-		glm::vec3 color2;
-	};
 private:
 	std::shared_ptr<MIDIData> mdata;
-	std::vector<note_vertex> vertex_data;
-	std::vector<unsigned> indice_data;
-	GLuint vbuf;
-	GLuint ibuf;
+
+	std::vector<glm::vec3> vertex_data[MIDIData::MAXCHANNEL];
+	GLuint vbuf[MIDIData::MAXCHANNEL];
+	glm::vec3 vertex_color[MIDIData::MAXCHANNEL][2];
+
+	std::vector<glm::vec3> bvertex_data;
+	GLuint bvbuf;
+public:
+	float minx, maxx;
+	float miny, maxy;
+	float minz, maxz;
+	
 public:
 	void LoadData(std::shared_ptr<MIDIData> mdata);
-	void Render(bool color2 = false);
+	void Render(int color = 0);
+	void RenderBox();
+	void RandomColor();
 private:
+	void MakeBox();
 };

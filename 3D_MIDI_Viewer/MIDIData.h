@@ -31,6 +31,8 @@ class MIDIData {
 	friend class MIDIObject;
 private:
 	std::vector<std::pair<int, std::pair<double, double> > > data[MAXCHANNEL]; // data[channel] = (note, (start_time, end_time))
+	std::vector<double> bar;
+
 	unsigned division;
 
 public:

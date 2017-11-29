@@ -34,6 +34,8 @@ int main(int argc, char *argv[])
 	if (!midfile[0]) {
 		fail("No MIDI file.");
 	}
+
+	printf("MIDI File:\n  %s\n", midfile);
 	std::unique_ptr<MIDIPlayer> mplay(new MIDIPlayer);
 	mplay->LoadMIDIFile(midfile);
 
@@ -43,6 +45,7 @@ int main(int argc, char *argv[])
 	//mdata->LoadRandomTestSample();
 
 
+	GLGraphics::Instance()->SetMIDIName(midfile);
 	GLGraphics::Instance()->InitGlut(&argc, argv);
 
 	std::unique_ptr<MIDIObject> mobj(new MIDIObject);

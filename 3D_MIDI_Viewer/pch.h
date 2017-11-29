@@ -1,6 +1,7 @@
 #pragma once
 
 #define _CRT_SECURE_NO_WARNINGS
+#define _USE_MATH_DEFINES
 
 #ifndef _DEBUG
 #define NDEBUG
@@ -8,6 +9,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cmath>
 #include <vector>
 #include <algorithm>
 #include <functional>
@@ -39,3 +41,5 @@
 
 #define be32toh _byteswap_ulong
 #define be16toh _byteswap_ushort
+
+#define MAXLINE 4096

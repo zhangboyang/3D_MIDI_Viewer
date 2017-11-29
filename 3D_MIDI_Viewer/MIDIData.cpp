@@ -74,13 +74,15 @@ void MIDIBuffer::Dump()
 void MIDIData::LoadMIDIFile(const std::string filename)
 {	
 	for (auto &cdata: data) cdata.clear();
+	bar.clear();
 
 	std::shared_ptr<std::vector<unsigned char> > fdata_buffer(new std::vector<unsigned char>);
 
 	FILE *fp = fopen(filename.c_str(), "rb");
-	int ch;
-	while ((ch = fgetc(fp)) != EOF) {
-		fdata_buffer->push_back(ch);
+	char buf[MAXLINE];
+	int len;
+	while ((len = fread(buf, 1, sizeof(buf), fp)) > 0) {
+		fdata_buffer->insert(fdata_buffer->end(), buf, buf + len);
 	}
 	fclose(fp);
 
@@ -148,22 +150,40 @@ void MIDIData::LoadMThd(std::unique_ptr<MIDIBuffer> mthd)
 
 	//system("pause");
 
-	if (!(h.format == 0 && h.tracks == 1) || !((h.division >> 15) == 0)) {
+	if (h.format == 0 && h.tracks != 1) {
+		throw InvalidMIDIFileException();
+	}
+	if (!((h.division >> 15) == 0)) {
 		throw UnsupportedMIDIFileException();
 	}
 }
 void MIDIData::LoadMTrk(std::unique_ptr<MIDIBuffer> mtrk)
 {
 	unsigned cur_tempo = 500000;
+	unsigned nn = 4, dd = 4;
 
 	double cur_time = 0;
 	std::map<std::pair<unsigned, unsigned>, double> k; // <channel, key> -> start time
 
+	unsigned long long raw_time = 0;
+	unsigned long long last_bar_raw_time = 0;
+
 	while (!mtrk->Eof()) {
-		unsigned delta_time = mtrk->ReadVLQ();
-		//printf(" Delta Time: %-10d ", (unsigned) delta_time);
+		unsigned raw_delta_time = mtrk->ReadVLQ();
+		raw_time += raw_delta_time;
+		double delta_time = raw_delta_time * cur_tempo / 1000000.0 / division;
+
+		//printf(" Delta Time: %-10d ", (unsigned) raw_delta_time);
 		
-		cur_time += delta_time * cur_tempo / 1000000.0 / division;
+		cur_time += delta_time;
+
+		unsigned long long bar_len_raw = (unsigned long long) division * nn / (dd / 4);
+		
+		while (last_bar_raw_time + bar_len_raw < raw_time) {
+			last_bar_raw_time += bar_len_raw;
+			bar.push_back(cur_time - (raw_time - last_bar_raw_time) * cur_tempo / 1000000.0 / division);
+		}
+
 
 		unsigned char token;
 		mtrk->Read(&token, 1, 0);
@@ -193,7 +213,20 @@ void MIDIData::LoadMTrk(std::unique_ptr<MIDIBuffer> mtrk)
 				}
 				printf(" Set Tempo: %u\n", cur_tempo);
 				//system("pause");
+				bar.push_back(cur_time);
 
+				break;
+			}
+			case 0x58: {
+				if (meta_hdr[2] != 0x04) {
+					throw InvalidMIDIFileException();
+				}
+				mtrk->Read(nullptr, 3, 1);
+				unsigned char ts[4];
+				mtrk->Read(&ts, sizeof(ts), 1);
+				nn = ts[0];
+				dd = 1 << ts[1];
+				printf(" Time Signature: %u/%u\n", nn, dd);
 				break;
 			}
 			default:
