@@ -33,7 +33,14 @@ private:
 	std::vector<std::pair<int, std::pair<double, double> > > data[MAXCHANNEL]; // data[channel] = (note, (start_time, end_time))
 	std::vector<double> bar;
 
+	std::map<unsigned long long, std::pair<unsigned, double> > tempo_map; // raw_time -> tempo, real_time
+	std::map<unsigned long long, std::pair<unsigned, unsigned> > ts_map; // raw_time -> time signature
+
+
 	unsigned division;
+	double max_time;
+	unsigned long long max_raw_time;
+	double max_end_of_track;
 
 public:
 	void LoadMIDIFile(const std::string filename);
@@ -41,5 +48,6 @@ public:
 	void LoadRandomTestSample();
 private:
 	void LoadMThd(std::unique_ptr<MIDIBuffer> mthd);
-	void LoadMTrk(std::unique_ptr<MIDIBuffer> mtrk);
+	void LoadMTrk(std::unique_ptr<MIDIBuffer> mtrk, int trkid);
+	void CalcBars();
 };

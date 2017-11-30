@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 	}
 	
 	#if _DEBUG
-	strcpy(midfile, "../../canyon.mid");
+	strcpy(midfile, "../../015.mid");
 	#endif
 
 	if (!midfile[0]) {

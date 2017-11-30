@@ -25,6 +25,7 @@ void MIDIPlayer::LoadMIDIFile(const std::string filename)
 }
 void MIDIPlayer::Play()
 {
+//return;
 	DWORD r;
 	r = mciSendCommand(dev, MCI_PLAY, 0, NULL);
 	if (r) {
@@ -57,6 +58,7 @@ void MIDIPlayer::Seek(float time)
 		printf("Can't seek.\n");
 	}
 }
+
 
 void MIDIPlayer::Reset()
 {

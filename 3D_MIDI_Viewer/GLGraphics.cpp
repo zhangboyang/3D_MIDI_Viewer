@@ -222,6 +222,7 @@ void GLGraphics::Render()
 		glutBitmapString(GLUT_BITMAP_8_BY_13, (const unsigned  char *) msg.c_str());
 	}
 
+	glFinish();
     if (use_double_buffer) glutSwapBuffers(); else glFlush();
 }
 
