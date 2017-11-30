@@ -150,8 +150,12 @@ void MIDIData::LoadMThd(std::unique_ptr<MIDIBuffer> mthd)
 
 	//system("pause");
 
-	if (h.format == 0 && h.tracks != 1) {
-		throw InvalidMIDIFileException();
+	if (h.format == 0) {
+		if (h.tracks != 1) {
+			throw InvalidMIDIFileException();
+		}
+	} else {
+		printf("WARNING: MIDI format 1 or 2 is not supported!\n");
 	}
 	if (!((h.division >> 15) == 0)) {
 		throw UnsupportedMIDIFileException();
@@ -165,9 +169,11 @@ void MIDIData::LoadMTrk(std::unique_ptr<MIDIBuffer> mtrk)
 	double cur_time = 0;
 	std::map<std::pair<unsigned, unsigned>, double> k; // <channel, key> -> start time
 
+	unsigned char last_status_byte = 0;
+
 	unsigned long long raw_time = 0;
 	unsigned long long last_bar_raw_time = 0;
-
+	
 	while (!mtrk->Eof()) {
 		unsigned raw_delta_time = mtrk->ReadVLQ();
 		raw_time += raw_delta_time;
@@ -185,26 +191,31 @@ void MIDIData::LoadMTrk(std::unique_ptr<MIDIBuffer> mtrk)
 		}
 
 
-		unsigned char token;
-		mtrk->Read(&token, 1, 0);
-		switch (token) {
+		unsigned char status_byte;
+		mtrk->Read(&status_byte, 1, 0);
+		if (status_byte >> 7) {
+			last_status_byte = status_byte;
+			mtrk->Read(nullptr, 1, 1);
+		} else {
+			status_byte = last_status_byte;
+		}
+		switch (status_byte) {
 		case 0xF0: case 0xF7: { // Sysex Event
-			unsigned char sysex_hdr[2];
-			mtrk->Read(sysex_hdr, sizeof(sysex_hdr), 0);
-			//printf("Sysex Event:\n");
-			//mtrk->SubBuffer(sizeof(sysex_hdr) + sysex_hdr[1], 0)->Dump();
-			mtrk->Read(nullptr, sizeof(sysex_hdr) + sysex_hdr[1], 1);
+			unsigned char sysex_hdr[2] = { status_byte };
+			mtrk->Read(sysex_hdr + 1, sizeof(sysex_hdr) - 1, 0);
+			//printf("Sysex Event:\n"); mtrk->SubBuffer(sizeof(sysex_hdr) + sysex_hdr[1], 0)->Dump();
+			mtrk->Read(nullptr, sizeof(sysex_hdr) - 1 + sysex_hdr[1], 1);
 			break;
 		}
 		case 0xFF: { // Meta Event
-			unsigned char meta_hdr[3];
-			mtrk->Read(meta_hdr, sizeof(meta_hdr), 0);
+			unsigned char meta_hdr[3]  = { status_byte };
+			mtrk->Read(meta_hdr + 1, sizeof(meta_hdr) - 1, 0);
 			switch (meta_hdr[1]) {
 			case 0x51: { // set tempo
 				if (meta_hdr[2] != 0x03) {
 					throw InvalidMIDIFileException();
 				}
-				mtrk->Read(nullptr, 3, 1);
+				mtrk->Read(nullptr, sizeof(meta_hdr) - 1, 1);
 				unsigned char value;
 				cur_tempo = 0;
 				for (int i = 0; i < 3; i++) {
@@ -221,7 +232,7 @@ void MIDIData::LoadMTrk(std::unique_ptr<MIDIBuffer> mtrk)
 				if (meta_hdr[2] != 0x04) {
 					throw InvalidMIDIFileException();
 				}
-				mtrk->Read(nullptr, 3, 1);
+				mtrk->Read(nullptr, sizeof(meta_hdr) - 1, 1);
 				unsigned char ts[4];
 				mtrk->Read(&ts, sizeof(ts), 1);
 				nn = ts[0];
@@ -230,25 +241,24 @@ void MIDIData::LoadMTrk(std::unique_ptr<MIDIBuffer> mtrk)
 				break;
 			}
 			default:
-				//printf("Meta Event:\n");
-				//mtrk->SubBuffer(sizeof(meta_hdr) + meta_hdr[2], 0)->Dump();
-				mtrk->Read(nullptr, sizeof(meta_hdr) + meta_hdr[2], 1);
+				//printf("Meta Event:\n"); mtrk->SubBuffer(sizeof(meta_hdr) - 1 + meta_hdr[2], 0)->Dump();
+				mtrk->Read(nullptr, sizeof(meta_hdr) - 1 + meta_hdr[2], 1);
 			}
 			break;
 		}
 		default:
-			switch (token >> 4) {
+			switch (status_byte >> 4) {
 			case 0x8:
 			case 0x9: {
-				unsigned char note_data[3];
-				mtrk->Read(note_data, sizeof(note_data), 1);
-				//printf("Note %s: %02X %02X %02X\n", (token >> 4) == 0x8 ? "off" : "on", (unsigned) note_data[0], (unsigned) note_data[1], (unsigned) note_data[2]);
+				unsigned char note_data[3] = { status_byte };
+				mtrk->Read(note_data + 1, sizeof(note_data) - 1, 1);
+				//printf("Note %s: %02X %02X %02X\n", (status_byte >> 4) == 0x8 ? "off" : "on", (unsigned) note_data[0], (unsigned) note_data[1], (unsigned) note_data[2]);
 
-				unsigned channel = token & 0xF;
+				unsigned channel = status_byte & 0xF;
 				unsigned notekey = note_data[1];
 				unsigned velocity = note_data[2];
 
-				if ((token >> 4) == 0x8 || velocity == 0) {
+				if ((status_byte >> 4) == 0x8 || velocity == 0) {
 					auto it = k.find(std::make_pair(channel, notekey));
 					if (it == k.end()) {
 						//printf("  Unmatched note off.\n");
@@ -273,21 +283,19 @@ void MIDIData::LoadMTrk(std::unique_ptr<MIDIBuffer> mtrk)
 			case 0xA:
 			case 0xB:
 			case 0xE: {
-				//printf("Ignored:\n");
-				//mtrk->SubBuffer(1 + 2, 0)->Dump();
-				mtrk->Read(nullptr, 1 + 2, 1);
+				// printf("Ignored:\n"); mtrk->SubBuffer(2, 0)->Dump();
+				mtrk->Read(nullptr, 2, 1);
 				break;
 			}
 			case 0xC:
 			case 0xD: {
-				//printf("Ignored:\n");
-				//mtrk->SubBuffer(1 + 1, 0)->Dump();
-				mtrk->Read(nullptr, 1 + 1, 1);
+				// printf("Ignored:\n"); mtrk->SubBuffer(1, 0)->Dump();
+				mtrk->Read(nullptr, 1, 1);
 				break;
 			}
 
 			default:
-				printf(" Unknown Token %02X.\n", (unsigned) token);
+				printf(" Unknown Event %02X.\n", (unsigned) status_byte);
 				throw InvalidMIDIFileException();
 			}
 		}

@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
 	}
 	
 	#if _DEBUG
-	strcpy(midfile, "../../test.mid");
+	strcpy(midfile, "../../canyon.mid");
 	#endif
 
 	if (!midfile[0]) {
@@ -39,14 +39,14 @@ int main(int argc, char *argv[])
 	}
 
 	printf("MIDI File:\n  %s\n\n", midfile);
-	std::unique_ptr<MIDIPlayer> mplay(new MIDIPlayer);
-	mplay->LoadMIDIFile(midfile);
 
 	std::unique_ptr<MIDIData> mdata(new MIDIData);
 	mdata->LoadMIDIFile(midfile);
 	//mdata->LoadTestSample();
 	//mdata->LoadRandomTestSample();
 
+	std::unique_ptr<MIDIPlayer> mplay(new MIDIPlayer);
+	mplay->LoadMIDIFile(midfile);
 
 	GLGraphics::Instance()->SetMIDIName(midfile);
 	GLGraphics::Instance()->InitGlut(&argc, argv);

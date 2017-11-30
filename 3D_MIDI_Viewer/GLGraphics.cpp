@@ -414,6 +414,7 @@ void GLGraphics::PrintUsage()
 	printf("  - +    Change alpha of Z=0\n");
 	printf("  [ ]    Change time scale\n");
 	printf("  < >    Seek\n");
+	printf("  Space  Pause/Resume\n");
 	printf("  r      Reset time\n");
 	printf("  m      Switch note render mode\n");
 	printf("  b      Toggle box\n");
