@@ -19,6 +19,7 @@
 #include <map>
 
 #include <windows.h>
+#include <dshow.h>
 
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -43,3 +44,7 @@
 #define be16toh _byteswap_ushort
 
 #define MAXLINE 4096
+
+#pragma comment(lib, "strmiids.lib")
+
+#define eps (1e-6)

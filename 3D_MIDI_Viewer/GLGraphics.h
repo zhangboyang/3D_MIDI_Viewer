@@ -45,6 +45,8 @@ private:
 	int draw_box = 1;
 	int draw_axis = 1;
 	int draw_msg = 1;
+	
+	int timer_mode = 1;
 
 	int mouse_button[MAX_MOUSE_BUTTON];
 	int mouse_buttonX[MAX_MOUSE_BUTTON];

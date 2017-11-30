@@ -1,12 +1,16 @@
 #pragma once
 
 class MIDIPlayer {
-	MCIDEVICEID dev;
+	IGraphBuilder *pGraph;
+	IMediaControl *pControl;
+	IMediaEvent *pEvent;
+	IMediaSeeking *pSeek;
 public:
 	void LoadMIDIFile(const std::string filename);
 	void Play();
 	void Pause();
 	void Stop();
-	void Seek(float time);
+	float Seek(float time);
+	float Tell();
 	void Reset();
 };

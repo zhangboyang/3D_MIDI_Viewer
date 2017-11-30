@@ -118,6 +118,8 @@ void GLGraphics::Render()
 	char s[MAXLINE];
 
 	UpdateTimer();
+
+	float midi_time = mplay->Tell();
 	
 
 	// calc FPS
@@ -125,7 +127,11 @@ void GLGraphics::Render()
 	sprintf(s, "fps %f\n", fps); msg += s;
 
 	// show parameters
-	sprintf(s, "time %f\n", GetTimer()); msg += s;
+	if (timer_mode) {
+		sprintf(s, "midi time %f\n", midi_time); msg += s;
+	} else {
+		sprintf(s, "real time %f\n", GetTimer()); msg += s;
+	}
 	sprintf(s, "yaw %f pitch %f\n", yaw, pitch); msg += s;
 	sprintf(s, "center %f %f %f\n", eyecenter.x, eyecenter.y, eyecenter.z); msg += s;
 	sprintf(s, "distance %f\n", eyedistance); msg += s;
@@ -174,7 +180,7 @@ void GLGraphics::Render()
 	model = glm::scale(glm::vec3(1.0f, 1.0f, -1.0f));
 	model = glm::translate(glm::vec3(-mobj->minx, -mobj->miny, 0.0f)) * model;
 	model = glm::scale(glm::vec3(1.0f / (mobj->maxx - mobj->minx) * trect_x, 1.0f / (mobj->maxy - mobj->miny) * trect_y, 1.0f)) * model;
-	model = glm::translate(glm::vec3(0.0f, 0.0f, GetTimer())) * model;
+	model = glm::translate(glm::vec3(0.0f, 0.0f, (timer_mode ? midi_time : GetTimer()))) * model;
 	model = glm::scale(glm::vec3(1.0f, 1.0f, time_scale)) * model;
 	glLoadMatrixf(&model[0][0]);
 	
@@ -290,12 +296,9 @@ void GLGraphics::KeyboardFunc(unsigned char key, int x, int y)
 	if (key == ' ') {
 		pause = !pause;
 		if (pause) {
-			mplay->Stop();
+			mplay->Pause();
 		} else {
-			float pos = GetTimer();
-			mplay->Seek(pos);
 			mplay->Play();
-			ResetTimer(pos);
 		}
 	}
 
@@ -338,6 +341,10 @@ void GLGraphics::KeyboardFunc(unsigned char key, int x, int y)
 
 	if (key == 's') {
 		draw_msg = !draw_msg;
+	}
+
+	if (key == 't') {
+		timer_mode = !timer_mode;
 	}
 
 	if (key == 'c') {
@@ -403,9 +410,9 @@ void GLGraphics::Seek(float abs_time)
 {
 	if (abs_time < 0) abs_time = 0;
 	mplay->Stop();
-	mplay->Seek(abs_time);
+	float t = mplay->Seek(abs_time);
 	if (!pause) mplay->Play();
-	ResetTimer(abs_time);
+	ResetTimer(t);
 }
 
 void GLGraphics::PrintUsage()
@@ -422,6 +429,7 @@ void GLGraphics::PrintUsage()
 	printf("  a      Toggle axis\n");
 	printf("  s      Toggle status\n");
 	printf("  c      Random color\n");
+	printf("  t      Change timer mode\n");
 	printf(" Mouse:\n");
 	printf("  Left   Move up/down\n");
 	printf("  Right  Rotate\n");
