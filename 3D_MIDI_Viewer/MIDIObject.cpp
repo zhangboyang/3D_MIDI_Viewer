@@ -9,7 +9,11 @@ void MIDIObject::RandomColor()
 }
 void MIDIObject::LoadData(std::shared_ptr<MIDIData> mdata)
 {
-	for (auto &vdata : vertex_data) vdata.clear();
+	for (auto &i : vertex_data) {
+		for (auto &j : i) {
+			j.clear();
+		}
+	}
 	this->mdata = mdata;
 	
 	RandomColor();
@@ -21,44 +25,52 @@ void MIDIObject::LoadData(std::shared_ptr<MIDIData> mdata)
 			int note = ndata.first;
 			double st = ndata.second.first, ed = ndata.second.second;
 
-			size_t index = vertex_data[ch].size();
-			vertex_data[ch].push_back(glm::vec3(ch, note, st));
-			vertex_data[ch].push_back(glm::vec3(ch, note, ed));
-			vertex_data[ch].push_back(glm::vec3(ch + NOTE_WIDTH, note, ed));
-			vertex_data[ch].push_back(glm::vec3(ch + NOTE_WIDTH, note, st));
+			vertex_data[0][ch].push_back(glm::vec3(ch, note + NOTE_HEIGHT / 2.0f, st));
+			vertex_data[0][ch].push_back(glm::vec3(ch, note + NOTE_HEIGHT / 2.0f, ed));
+			vertex_data[0][ch].push_back(glm::vec3(ch + NOTE_WIDTH, note + NOTE_HEIGHT / 2.0f, ed));
+			vertex_data[0][ch].push_back(glm::vec3(ch + NOTE_WIDTH, note + NOTE_HEIGHT / 2.0f, st));
+
+			vertex_data[1][ch].push_back(glm::vec3(ch + NOTE_WIDTH / 2.0f, note, st));
+			vertex_data[1][ch].push_back(glm::vec3(ch + NOTE_WIDTH / 2.0f, note, ed));
+			vertex_data[1][ch].push_back(glm::vec3(ch + NOTE_WIDTH / 2.0f, note + NOTE_HEIGHT, ed));
+			vertex_data[1][ch].push_back(glm::vec3(ch + NOTE_WIDTH / 2.0f, note + NOTE_HEIGHT, st));
 		}
 	}
 
 	minx = miny = minz = std::numeric_limits<float>::infinity();
 	maxx = maxy = maxz = -std::numeric_limits<float>::infinity();
-	for (auto &vdata: vertex_data) {
-		for (auto &v: vdata) {
-			minx = std::min(minx, v.x);
-			miny = std::min(miny, v.y);
-			minz = std::min(minz, v.z);
-			maxx = std::max(maxx, v.x);
-			maxy = std::max(maxy, v.y);
-			maxz = std::max(maxz, v.z);
+	for (auto &i: vertex_data) {
+		for (auto &j: i) {
+			for (auto &v: j) {
+				minx = std::min(minx, v.x);
+				miny = std::min(miny, v.y);
+				minz = std::min(minz, v.z);
+				maxx = std::max(maxx, v.x);
+				maxy = std::max(maxy, v.y);
+				maxz = std::max(maxz, v.z);
+			}
 		}
 	}
 
-	float xborder = (maxx - minx) * 0.05f;
-	minx -= xborder;
-	maxx += xborder;
-	float yborder = (maxy - miny) * 0.05f;
-	miny -= yborder;
-	maxy += yborder;
-	
+    float xborder = (maxx - minx) * 0.05f;
+    minx -= xborder;
+    maxx += xborder;
+    float yborder = (maxy - miny) * 0.05f;
+    miny -= yborder;
+    maxy += yborder;
 
 	printf("MIDI 3D Object:\n");
 
-	glGenBuffers(MIDIData::MAXCHANNEL, vbuf);
+	glGenBuffers(MIDIData::MAXCHANNEL, vbuf[0]);
+	glGenBuffers(MIDIData::MAXCHANNEL, vbuf[1]);
 	
 	double vsize = 0.0;
-	for (int ch = 0; ch < MIDIData::MAXCHANNEL; ch++) {
-		glBindBuffer(GL_ARRAY_BUFFER, vbuf[ch]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data[ch][0]) * vertex_data[ch].size(), vertex_data[ch].data(), GL_STATIC_DRAW);
-		vsize += sizeof(vertex_data[ch][0]) * vertex_data[ch].size() / 1024.0;
+	for (int r = 0; r < 2; r++) {
+		for (int ch = 0; ch < MIDIData::MAXCHANNEL; ch++) {
+			glBindBuffer(GL_ARRAY_BUFFER, vbuf[r][ch]);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data[r][ch]) * vertex_data[r][ch].size(), vertex_data[r][ch].data(), GL_STATIC_DRAW);
+			vsize += sizeof(vertex_data[r][ch][0]) * vertex_data[r][ch].size() / 1024.0;
+		}
 	}
 	printf(" Note Vertex: %.3f KB\n", vsize);
 
@@ -68,15 +80,15 @@ void MIDIObject::LoadData(std::shared_ptr<MIDIData> mdata)
 }
 
 
-void MIDIObject::Render(int color)
+void MIDIObject::Render(int roll, int color)
 {
 	glEnableClientState(GL_VERTEX_ARRAY);
 
 	for (int ch = 0; ch < MIDIData::MAXCHANNEL; ch++) {
 		glColor3fv(&vertex_color[ch][color][0]);
-		glBindBuffer(GL_ARRAY_BUFFER, vbuf[ch]);
+		glBindBuffer(GL_ARRAY_BUFFER, vbuf[roll][ch]);
 		glVertexPointer(3, GL_FLOAT, 0, 0);
-		glDrawArrays(GL_QUADS, 0, vertex_data[ch].size());
+		glDrawArrays(GL_QUADS, 0, vertex_data[roll][ch].size());
 	}
 }
 

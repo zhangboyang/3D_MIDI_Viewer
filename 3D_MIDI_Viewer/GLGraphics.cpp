@@ -196,12 +196,12 @@ void GLGraphics::Render()
 	if (note_mode & 2) {
 		glEnable(GL_POLYGON_OFFSET_FILL);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		mobj->Render();
+		mobj->Render(roll_mode, 0);
 	}
 	if (note_mode & 1) {
 		glDisable(GL_POLYGON_OFFSET_FILL);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		mobj->Render(1);
+		mobj->Render(roll_mode, 1);
 	}
 
 
@@ -350,6 +350,10 @@ void GLGraphics::KeyboardFunc(unsigned char key, int x, int y)
 	if (key == 'c') {
 		mobj->RandomColor();
 	}
+
+	if (key == 'n') {
+		roll_mode = !roll_mode;
+	}
 }
 
 void GLGraphics::MouseFunc(int button, int state, int x, int y)
@@ -425,6 +429,7 @@ void GLGraphics::PrintUsage()
 	printf("  Space  Pause/Resume\n");
 	printf("  r      Reset time\n");
 	printf("  m      Switch note render mode\n");
+	printf("  n      Toggle roll\n");
 	printf("  b      Toggle box\n");
 	printf("  a      Toggle axis\n");
 	printf("  s      Toggle status\n");

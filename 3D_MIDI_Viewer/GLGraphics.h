@@ -48,6 +48,8 @@ private:
 	
 	int timer_mode = 1;
 
+	int roll_mode = 0;
+
 	int mouse_button[MAX_MOUSE_BUTTON];
 	int mouse_buttonX[MAX_MOUSE_BUTTON];
 	int mouse_buttonY[MAX_MOUSE_BUTTON];

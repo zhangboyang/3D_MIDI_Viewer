@@ -240,6 +240,7 @@ void MIDIData::LoadMTrk(std::unique_ptr<MIDIBuffer> mtrk, int trkid)
 				}
 				mtrk->Read(nullptr, sizeof(meta_hdr) - 1, 1);
 				printf(" End of this track: %fs\n", cur_time);
+				bar.push_back(cur_time);
 				max_end_of_track = std::max(max_end_of_track, cur_time);
 				break;
 			}

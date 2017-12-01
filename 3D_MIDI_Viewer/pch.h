@@ -47,4 +47,17 @@
 
 #pragma comment(lib, "strmiids.lib")
 
+#pragma warning(disable: 4996)
+
 #define eps (1e-6)
+
+
+template <class T> void SafeRelease(T **ppT)
+{
+    if (*ppT)
+    {
+        (*ppT)->Release();
+        *ppT = NULL;
+    }
+}
+
